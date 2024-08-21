@@ -1,23 +1,27 @@
 import os
 import hashlib
+from getpass import getpass
 
 clear_command = input('your terminals cls command: ')
 os.system(clear_command)
+print('welcome to insider')
+print('type help for help')
+print('standard password is `123` but you can change it')
 user = "simon"
-host = "insider"
+host = "esp1814"
 wp = "/"
 column_width = 30
 superuser = False
 
 def password():
     h = hashlib.new('sha256')
-    h.update(input('Pass:').encode())
+    h.update(getpass().encode())
     with open("password.txt", "r") as file_pass:
         readpass = file_pass.readline()
     return readpass == h.hexdigest()
 
 while True:
-    cmd = input('{' + user + '$' + host + '}:~' + wp + '$ ')
+    cmd = input('[' + user + '§' + host + ']:' + wp + '$ ')
     if cmd == 'ls':
         try:
             files = os.listdir(wp)
@@ -31,6 +35,10 @@ while True:
     if cmd.startswith('cd '):
         target = cmd.split(" ",1)[1]
         wp = target
+
+    if cmd.startswith('cdu '):
+        target = cmd.split(" ",1)[1]
+        wp = wp + target
 
     if cmd == 'pwd':
         print(wp)
@@ -58,10 +66,11 @@ while True:
         column_width = cmd.split(" ",1)[1]
 
     if cmd.startswith('su'):
-        accepted = password()
-        if accepted:
+        if password():
             print('super user enabled')
             superuser = True
+        else:
+            print('incorrect password, check if its correct or if the password is incorrectly hashed')
 
     if cmd == 'exsu':
         print('super user disabled')
@@ -73,9 +82,22 @@ while True:
     if cmd == 'pass':
         if superuser:
             if password():
-                new_pass = input('new pass: ')
+                new_pass = getpass('new pass: ')
                 h = hashlib.new('sha256')
                 h.update(new_pass.encode())
                 new_pass = h.hexdigest()
                 with open("password.txt", "w") as file_pass:  # Open file in write mode
                     file_pass.write(new_pass)
+            else:
+                print('incorrect password, check if its correct or if the password is incorrectly hashed')
+        else:
+            print('requires superuser')
+    
+    if cmd.startswith('user '):
+        user = cmd.split(" ",1)[1]
+
+    if cmd.startswith('host '):
+        if superuser:
+            host = cmd.split(" ",1)[1]
+        else:
+            print('requires superuser')
