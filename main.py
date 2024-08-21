@@ -1,4 +1,5 @@
 import os
+import hashlib
 
 os.system('cls')
 user = "simon"
@@ -8,11 +9,11 @@ column_width = 30
 superuser = False
 
 def password():
-    prompt = input('Pass:')
-    file_pass = open(r"/insider/password.txt", "Access_Mode")
-    readpass = file_pass.readline()
-    file_pass.close()
-    return readpass == prompt
+    h = hashlib.new('sha256')
+    h.update(input('Pass:').encode())
+    with open("password.txt", "r") as file_pass:
+        readpass = file_pass.readline()
+    return readpass == h.hexdigest()
 
 while True:
     cmd = input('{' + user + '$' + host + '} ')
@@ -53,7 +54,8 @@ while True:
         column_width = cmd.split(" ",1)[1]
 
     if cmd.startswith('su'):
-        if password:
+        accepted = password()
+        if accepted:
             print('super user enabled')
             superuser = True
 
@@ -63,3 +65,10 @@ while True:
     
     if cmd == 'chsu':
         print(superuser)
+
+    if cmd == 'pass':
+        if superuser:
+            if password():
+                new_pass = input('new pass: ')
+                with open("password.txt", "w") as file_pass:  # Open file in write mode
+                    file_pass.write(new_pass)
