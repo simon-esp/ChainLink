@@ -17,13 +17,16 @@ def password():
     return readpass == h.hexdigest()
 
 while True:
-    cmd = input('{' + user + '$' + host + '} ')
+    cmd = input('{' + user + '$' + host + '}:~' + wp + '$ ')
     if cmd == 'ls':
-        files = os.listdir(wp)
-        print(" ")
-        for index, file in enumerate(files):
-            print(f"{file:<{column_width}}", end=" | " if (index + 1) % 3 and index + 1 != len(files) else "\n")
-        print(" ")
+        try:
+            files = os.listdir(wp)
+            print(" ")
+            for index, file in enumerate(files):
+                print(f"{file:<{column_width}}", end=" | " if (index + 1) % 3 and index + 1 != len(files) else "\n")
+            print(" ")
+        except:
+            print('file is not a directory, or an unexpected error occurred')
 
     if cmd.startswith('cd '):
         target = cmd.split(" ",1)[1]
@@ -71,5 +74,8 @@ while True:
         if superuser:
             if password():
                 new_pass = input('new pass: ')
+                h = hashlib.new('sha256')
+                h.update(new_pass.encode())
+                new_pass = h.hexdigest()
                 with open("password.txt", "w") as file_pass:  # Open file in write mode
                     file_pass.write(new_pass)
