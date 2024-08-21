@@ -1,7 +1,8 @@
 import os
 import hashlib
 
-os.system('cls')
+clear_command = input('your terminals cls command: ')
+os.system(clear_command)
 user = "simon"
 host = "insider"
 wp = "/"
@@ -48,7 +49,7 @@ while True:
         print(' ')
 
     if cmd == 'clear':
-        os.system('cls')
+        os.system(clear_command)
 
     if cmd.startswith('dispw'):
         column_width = cmd.split(" ",1)[1]
