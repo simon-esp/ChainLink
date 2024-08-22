@@ -48,18 +48,20 @@ while True:
         print('Commands available:')
         print('ls                     | lists all files inside working directory')
         print('cd {directory}         | change working directory')
+        print('mdu {directory}        | add a path to your already existing working directory')
         print('pwd                    | print out current working directory')
         print('dispw {column width}   | edit the column width used for various commands like `ls`')
-        print('clear                  | clears the terminal')
+        print('clr                    | clears the terminal')
         print('su                     | enable super user [PASSWORD PROMPT]')
         print('exsu                   | exit super user')
         print('chsu                   | check wether you are super user or not')
         print('host {new host}        | change the host [SUPER COMMAND]')
         print('user {new user}        | change the username')
         print('pass {new pass}        | change the password [SUPER COMMAND] [PASSWORD PROMPT]')
+        print('bcmd                   | gives a prompt to run in the systems terminal')
         print(' ')
 
-    if cmd == 'clear':
+    if cmd == 'clr':
         os.system(clear_command)
 
     if cmd.startswith('dispw'):
@@ -101,3 +103,10 @@ while True:
             host = cmd.split(" ",1)[1]
         else:
             print('requires superuser')
+
+    if cmd == 'bcmd':
+        os.system(input('your command: '))
+
+    if cmd.startswith('cat'):
+        with open('C:' + wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
+            print (f.read())
