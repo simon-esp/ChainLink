@@ -7,8 +7,11 @@ os.system(clear_command)
 print('welcome to insider')
 print('type help for help')
 print('standard password is `123` but you can change it')
-user = "simon"
-host = "esp1814"
+with open("data.txt", "r") as f:
+    data = f.read()
+    data = data.split("|",1)
+    user = data[0]
+    host = data[1]
 wp = "/"
 column_width = 30
 superuser = False
@@ -48,7 +51,8 @@ while True:
         print('Commands available:')
         print('ls                     | lists all files inside working directory')
         print('cd {directory}         | change working directory')
-        print('mdu {directory}        | add a path to your already existing working directory')
+        print('cdu {directory}        | add a path to your already existing working directory')
+        print('cdd                    | go back 1 directory')
         print('pwd                    | print out current working directory')
         print('dispw {column width}   | edit the column width used for various commands like `ls`')
         print('clr                    | clears the terminal')
@@ -59,6 +63,7 @@ while True:
         print('user {new user}        | change the username')
         print('pass {new pass}        | change the password [SUPER COMMAND] [PASSWORD PROMPT]')
         print('bcmd                   | gives a prompt to run in the systems terminal')
+        print('cat {file}             | print the contents of a the file, has to be under your working directory')
         print(' ')
 
     if cmd == 'clr':
@@ -97,10 +102,14 @@ while True:
     
     if cmd.startswith('user '):
         user = cmd.split(" ",1)[1]
+        with open("data.txt", "w") as f:  # Open file in write mode
+            f.write(user + '|' + host)
 
     if cmd.startswith('host '):
         if superuser:
             host = cmd.split(" ",1)[1]
+            with open("data.txt", "w") as f:  # Open file in write mode
+                f.write(user + '|' + host)
         else:
             print('requires superuser')
 
@@ -108,5 +117,17 @@ while True:
         os.system(input('your command: '))
 
     if cmd.startswith('cat'):
-        with open('C:' + wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
+        with open(wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
             print (f.read())
+
+    if cmd == 'cdd':
+        dir_split = wp.split("/")
+        dir_fuse = ''
+        for i in range(len(dir_split) - 2):
+            dir_fuse = dir_fuse + '/' + dir_split[i+1]
+        wp = dir_fuse
+        if wp == '':
+            wp = '/'
+
+    if cmd == 'sl':
+        print('🚂')
