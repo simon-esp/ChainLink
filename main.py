@@ -1,13 +1,14 @@
 import os
 import hashlib
 from getpass import getpass
-from cryptography.fernet import Fernet
+from termcolor import colored, cprint
 
-clear_command = input('your terminals cls command: ')
+#clear_command = input(colored('your terminals cls command: ', 'green'))
+clear_command = 'cls'
 os.system(clear_command)
-print('welcome to insider')
-print('type help for help')
-print('standard password is `123` but you can change it')
+print(colored('welcome to chainline', 'green'))
+print(colored('type help for help', 'green'))
+print(colored('standard password is `123` but you can change it', 'green'))
 with open("data.txt", "r") as f:
     data = f.read()
     data = data.split("|",1)
@@ -24,34 +25,15 @@ def password():
         readpass = file_pass.readline()
     return readpass == h.hexdigest()
 
-def custom_encrypt_decrypt(key: bytes, text: str, operation: str) -> str:
-    """
-    Encrypts or decrypts text using the provided key.
-
-    :param key: The encryption key (32-byte, URL-safe base64-encoded).
-    :param text: The text to encrypt or decrypt.
-    :param operation: Specify "encrypt" to encrypt the text or "decrypt" to decrypt it.
-    :return: The encrypted or decrypted text.
-    """
-    cipher = Fernet(key)
-
-    if operation == "encrypt":
-        encrypted_text = cipher.encrypt(text.encode())
-        return encrypted_text.decode()
-    elif operation == "decrypt":
-        decrypted_text = cipher.decrypt(text.encode())
-        return decrypted_text.decode()
-    else:
-        raise ValueError("Invalid operation. Choose either 'encrypt' or 'decrypt'.")
-
 while True:
-    cmd = input('[' + user + '§' + host + ']:' + wp + '$ ')
+    cmd_text = colored('[' + user + '§' + host + ']:' + colored(wp, attrs=['underline']) + colored('$ ', 'magenta', attrs=['bold']), 'magenta', attrs=['bold'])
+    cmd = input(cmd_text)
     if cmd == 'ls':
         try:
             files = os.listdir(wp)
             print(" ")
             for index, file in enumerate(files):
-                print(f"{file:<{column_width}}", end=" | " if (index + 1) % 3 and index + 1 != len(files) else "\n")
+                print(colored(f"{file:<{column_width}}", 'cyan'), end=colored(" | ", 'yellow') if (index + 1) % 3 != 0 and index + 1 != len(files) else "\n")
             print(" ")
         except:
             print('file is not a directory, or an unexpected error occurred')
@@ -69,22 +51,22 @@ while True:
 
     if cmd == 'help':
         print(' ')
-        print('Commands available:')
-        print('ls                     | lists all files inside working directory')
-        print('cd {directory}         | change working directory')
-        print('cdu {directory}        | add a path to your already existing working directory')
-        print('cdd                    | go back 1 directory')
-        print('pwd                    | print out current working directory')
-        print('dispw {column width}   | edit the column width used for various commands like `ls`')
-        print('clr                    | clears the terminal')
-        print('su                     | enable super user [PASSWORD PROMPT]')
-        print('exsu                   | exit super user')
-        print('chsu                   | check wether you are super user or not')
-        print('host {new host}        | change the host [SUPER COMMAND]')
-        print('user {new user}        | change the username')
-        print('pass {new pass}        | change the password [SUPER COMMAND] [PASSWORD PROMPT]')
-        print('bcmd                   | gives a prompt to run in the systems terminal')
-        print('cat {file}             | print the contents of a the file, has to be under your working directory')
+        print(colored('Commands available:', 'cyan'))
+        print(colored('ls                     | lists all files inside working directory', 'cyan'))
+        print(colored('cd {directory}         | change working directory', 'cyan'))
+        print(colored('cdu {directory}        | add a path to your already existing working directory', 'cyan'))
+        print(colored('cdd                    | go back 1 directory', 'cyan'))
+        print(colored('pwd                    | print out current working directory', 'cyan'))
+        print(colored('dispw {column width}   | edit the column width used for various commands like `ls`', 'cyan'))
+        print(colored('clr                    | clears the terminal', 'cyan'))
+        print(colored('su                     | enable super user [PASSWORD PROMPT]', 'cyan'))
+        print(colored('exsu                   | exit super user', 'cyan'))
+        print(colored('chsu                   | check wether you are super user or not', 'cyan'))
+        print(colored('host {new host}        | change the host [SUPER COMMAND]', 'cyan'))
+        print(colored('user {new user}        | change the username', 'cyan'))
+        print(colored('pass {new pass}        | change the password [SUPER COMMAND] [PASSWORD PROMPT]', 'cyan'))
+        print(colored('bcmd                   | gives a prompt to run in the systems terminal', 'cyan'))
+        print(colored('cat {file}             | print the contents of a the file, has to be under your working directory', 'cyan'))
         print(' ')
 
     if cmd == 'clr':
@@ -156,12 +138,15 @@ while True:
     if cmd.startswith('copy '):
         split = cmd.split(" ")
         try:
+            print(split)
             full_path = wp + split[1]
             print(f"Trying to open file: {full_path}")  # Debugging line
             with open(full_path, 'r') as f:
                     content = f.read()
+            print('finding path..')
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            file_path = os.path.join(script_dir, '!' + split[2])
+            file_path = os.path.join(script_dir, '!' + split[1])
+            print('creating file..')
             with open(file_path, 'a') as f:
                 f.write(content)
             print(f"File copied to {file_path}")
@@ -170,25 +155,9 @@ while True:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    if cmd.startswith('enc'):
-        split = cmd.split(" ")
-        try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            file_path = os.path.join(script_dir, split[2])
-            #found filepath
-            print(f"Trying to open file: {full_path}")  # Debugging line
-            with open(file_path, 'r') as f:
-                    content = f.read()
-            #got content
-            key = Fernet.generate_key()
-            cipher = Fernet(key)
-            content = Fernet.encrypt(content)
-            with open(file_path, 'w') as f:
-                f.write(content)
-            with open(os.path.join(script_dir, 'key' + split[2]), 'w') as f:
-                f.write(content)
-            print(f"File encrypted to {file_path}")
-        except FileNotFoundError:
-            print(f"{full_path} does not exist")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+    if cmd.startswith('echo '):
+        # Remove 'echo ' from the beginning and print the rest of the command
+        print(" ".join(cmd.split(" ")[1:]))
+
+    if cmd == 'cdtos':
+        wp = os.path.dirname(os.path.abspath(__file__))
