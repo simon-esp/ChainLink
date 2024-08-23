@@ -1,6 +1,7 @@
 import os
 import hashlib
 from getpass import getpass
+from cryptography.fernet import Fernet
 
 clear_command = input('your terminals cls command: ')
 os.system(clear_command)
@@ -22,6 +23,26 @@ def password():
     with open("password.txt", "r") as file_pass:
         readpass = file_pass.readline()
     return readpass == h.hexdigest()
+
+def custom_encrypt_decrypt(key: bytes, text: str, operation: str) -> str:
+    """
+    Encrypts or decrypts text using the provided key.
+
+    :param key: The encryption key (32-byte, URL-safe base64-encoded).
+    :param text: The text to encrypt or decrypt.
+    :param operation: Specify "encrypt" to encrypt the text or "decrypt" to decrypt it.
+    :return: The encrypted or decrypted text.
+    """
+    cipher = Fernet(key)
+
+    if operation == "encrypt":
+        encrypted_text = cipher.encrypt(text.encode())
+        return encrypted_text.decode()
+    elif operation == "decrypt":
+        decrypted_text = cipher.decrypt(text.encode())
+        return decrypted_text.decode()
+    else:
+        raise ValueError("Invalid operation. Choose either 'encrypt' or 'decrypt'.")
 
 while True:
     cmd = input('[' + user + '§' + host + ']:' + wp + '$ ')
@@ -131,3 +152,50 @@ while True:
 
     if cmd == 'sl':
         print('🚂')
+    
+    if cmd.startswith('copy '):
+        split = cmd.split(" ")
+        arg = split[1]
+        if arg.startswith('-'):
+            arg = arg.split("-")[1]
+            if arg == 's':
+                try:
+                    full_path = wp + split[2]
+                    print(f"Trying to open file: {full_path}")  # Debugging line
+                    with open(full_path, 'r') as f:
+                        content = f.read()
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    file_path = os.path.join(script_dir, 'icf§' + split[2])
+                    with open(file_path, 'a') as f:
+                        f.write(content)
+                    print(f"File copied to {file_path}")
+                except FileNotFoundError:
+                    print(f"{full_path} does not exist")
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+            if arg == 'e':
+                try:
+                    full_path = wp + split[2]
+                    print(f"Trying to open file: {full_path}")  # Debugging line
+                    with open(full_path, 'r') as f:
+                        content = f.read()
+                        
+                    key = Fernet.generate_key()
+                    with open(script_dir, 'icfkey§' + split[2], 'a'):
+                        f.write(key)
+
+                    content = custom_encrypt_decrypt(key=key, text=content, operation='encrypt')
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+                    file_path = os.path.join(script_dir, 'icf§' + split[2])
+                    with open(file_path, 'a') as f:
+                        f.write(content)
+
+                    print(f"File copied to {file_path}")
+
+                except FileNotFoundError:
+                    print(f"{full_path} does not exist")
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+        else:
+            print('No valid arguments given')
