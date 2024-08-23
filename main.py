@@ -155,47 +155,40 @@ while True:
     
     if cmd.startswith('copy '):
         split = cmd.split(" ")
-        arg = split[1]
-        if arg.startswith('-'):
-            arg = arg.split("-")[1]
-            if arg == 's':
-                try:
-                    full_path = wp + split[2]
-                    print(f"Trying to open file: {full_path}")  # Debugging line
-                    with open(full_path, 'r') as f:
-                        content = f.read()
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-                    file_path = os.path.join(script_dir, 'icf§' + split[2])
-                    with open(file_path, 'a') as f:
-                        f.write(content)
-                    print(f"File copied to {file_path}")
-                except FileNotFoundError:
-                    print(f"{full_path} does not exist")
-                except Exception as e:
-                    print(f"An error occurred: {e}")
-            if arg == 'e':
-                try:
-                    full_path = wp + split[2]
-                    print(f"Trying to open file: {full_path}")  # Debugging line
-                    with open(full_path, 'r') as f:
-                        content = f.read()
-                        
-                    key = Fernet.generate_key()
-                    with open(script_dir, 'icfkey§' + split[2], 'a'):
-                        f.write(key)
+        try:
+            full_path = wp + split[1]
+            print(f"Trying to open file: {full_path}")  # Debugging line
+            with open(full_path, 'r') as f:
+                    content = f.read()
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(script_dir, '!' + split[2])
+            with open(file_path, 'a') as f:
+                f.write(content)
+            print(f"File copied to {file_path}")
+        except FileNotFoundError:
+            print(f"{full_path} does not exist")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-                    content = custom_encrypt_decrypt(key=key, text=content, operation='encrypt')
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-
-                    file_path = os.path.join(script_dir, 'icf§' + split[2])
-                    with open(file_path, 'a') as f:
-                        f.write(content)
-
-                    print(f"File copied to {file_path}")
-
-                except FileNotFoundError:
-                    print(f"{full_path} does not exist")
-                except Exception as e:
-                    print(f"An error occurred: {e}")
-        else:
-            print('No valid arguments given')
+    if cmd.startswith('enc'):
+        split = cmd.split(" ")
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(script_dir, split[2])
+            #found filepath
+            print(f"Trying to open file: {full_path}")  # Debugging line
+            with open(file_path, 'r') as f:
+                    content = f.read()
+            #got content
+            key = Fernet.generate_key()
+            cipher = Fernet(key)
+            content = Fernet.encrypt(content)
+            with open(file_path, 'w') as f:
+                f.write(content)
+            with open(os.path.join(script_dir, 'key' + split[2]), 'w') as f:
+                f.write(content)
+            print(f"File encrypted to {file_path}")
+        except FileNotFoundError:
+            print(f"{full_path} does not exist")
+        except Exception as e:
+            print(f"An error occurred: {e}")
