@@ -43,8 +43,9 @@ while True:
         wp = target
 
     if cmd.startswith('cdu '):
-        target = cmd.split(" ",1)[1]
-        wp = wp + target
+        target = cmd.split(" ", 1)[1]
+        wp = os.path.join(wp, target)
+
 
     if cmd == 'pwd':
         print(wp)
@@ -67,6 +68,9 @@ while True:
         print(colored('pass {new pass}        | change the password [SUPER COMMAND] [PASSWORD PROMPT]', 'cyan'))
         print(colored('bcmd                   | gives a prompt to run in the systems terminal', 'cyan'))
         print(colored('cat {file}             | print the contents of a the file, has to be under your working directory', 'cyan'))
+        print(colored('cdtos                  | cd to os, changes directory to os folder', 'cyan'))
+        print(colored('echo {text}            | echo text to the terminal, useful in assembly i guess', 'cyan'))
+        print(colored('copy {file}            | copy a file to the os folder, with a `!` in front', 'cyan'))
         print(' ')
 
     if cmd == 'clr':
@@ -120,17 +124,16 @@ while True:
         os.system(input('your command: '))
 
     if cmd.startswith('cat'):
-        with open(wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
-            print (f.read())
+        try:
+            with open(wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
+                print (f.read())
+        except Exception as e:
+            print(f"Error: {e}")
 
     if cmd == 'cdd':
-        dir_split = wp.split("/")
-        dir_fuse = ''
-        for i in range(len(dir_split) - 2):
-            dir_fuse = dir_fuse + '/' + dir_split[i+1]
-        wp = dir_fuse
+        wp = os.path.dirname(os.path.normpath(wp))
         if wp == '':
-            wp = '/'
+            wp = '\\'
 
     if cmd == 'sl':
         print('🚂')
@@ -139,7 +142,7 @@ while True:
         split = cmd.split(" ")
         try:
             print(split)
-            full_path = wp + split[1]
+            full_path = os.path.join(wp, split[1])
             print(f"Trying to open file: {full_path}")  # Debugging line
             with open(full_path, 'r') as f:
                     content = f.read()
@@ -150,8 +153,8 @@ while True:
             with open(file_path, 'a') as f:
                 f.write(content)
             print(f"File copied to {file_path}")
-        except FileNotFoundError:
-            print(f"{full_path} does not exist")
+        except FileNotFoundError as e:
+            print(f"{full_path} does not exist, {e}")
         except Exception as e:
             print(f"An error occurred: {e}")
 
