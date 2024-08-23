@@ -8,7 +8,7 @@ Basicly type `help` to know them <br>
 ### Installing<br>
 (not that you should)<br>
 Its a python file (shocking) so i recommend either running in vscode or just normal terminal<br>
-You can change the script anytime so its open-source?<br>
+You can change the script anytime so its open-source i guess?<br>
 #### Steps:
 1. Download .zip file
 2. Unzip and drag the folder where you want it
