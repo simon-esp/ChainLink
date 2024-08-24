@@ -59,6 +59,7 @@ def eval_expression(value):
 
 def execute_line(i):
     global variables
+    global funcs
     split = i.split(' ')
     match split[0]:
 
@@ -89,16 +90,27 @@ def execute_line(i):
             if condition(" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[0]):
                 script_to_do = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[1]).strip('[]').split(',')) + ']')
                 execute_script(script_to_do)
+        
+        case 'def':
+            script_to_add = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
+            funcs[split[1]] = script_to_add
+        
+        case 'call':
+            script_to_do = funcs.get(split[1], '')
+            execute_script(script_to_do)
                 
 def execute_script(script):
     global variables
+    global funcs
     for line in script:
         if line.strip():
             execute_line(line.strip())
 
 def load(file):
     global variables
+    global funcs
     variables = {}
+    funcs = {}
     s = get_scr(file=file)  # `s` is the script without newlines, which means it's the script to compile
     lines = s.split(';')
     execute_script(lines)
