@@ -82,7 +82,7 @@ def execute_script(script):
         if line.strip():
             execute_line(line.strip())
 
-def compile(file):
+def load(file):
     global variables
     variables = {}
     s = get_scr(file=file)  # `s` is the script without newlines, which means it's the script to compile
@@ -90,4 +90,4 @@ def compile(file):
     execute_script(lines)
 
 # Example usage
-compile(r"C:\Users\spoki\OneDrive\chainlink\helloworld.cks")  # Update the path as needed
+load(r"C:\Users\spoki\OneDrive\chainlink\helloworld.cks")  # Update the path as needed
