@@ -1,4 +1,5 @@
 import time
+import ast
 
 def get_scr(file):
     # Fetch file and turn into 1 string, no newlines
@@ -10,62 +11,77 @@ def get_scr(file):
     except Exception as e:
         print('File was not found, or an error occurred')
         print(f'Error: {e}')
-        return(";")
+        return ";"
     
-def eval(value):
+def condition(c):
+    global variables
+    if c[:2] == '=!':
+        operands = c.split('!')
+        return float(eval_expression(operands[1])) == float(eval_expression(operands[2]))
+
+def eval_expression(value):
     global variables
     if value[0] == '$':
-        return variables.get(value)
-    if value[0] == '"' and value[len(value)-1]:
-        return value[1:len(value)-1]
-    if value[0] + value[1] == '+!':
-        return int(eval(value.split('!')[1])) + int(eval(value.split('!')[2]))
-    if value[0] + value[1] == '-!':
-        return int(eval(value.split('!')[1])) - int(eval(value.split('!')[2]))
-    if value[0] + value[1] == '*!':
-        return int(eval(value.split('!')[1])) * int(eval(value.split('!')[2]))
-    if value[0] + value[1] == '/!':
-        return int(eval(value.split('!')[1])) / int(eval(value.split('!')[2]))
+        return variables.get(value, 0)  # Default to 0 if the variable is not found
+    if value[0] == '"' and value[-1] == '"':
+        return value[1:-1]
+    if value[:2] == '+!':
+        operands = value.split('!')
+        return float(eval_expression(operands[1])) + float(eval_expression(operands[2]))
+    if value[:2] == '-!':
+        operands = value.split('!')
+        return float(eval_expression(operands[1])) - float(eval_expression(operands[2]))
+    if value[:2] == '*!':
+        operands = value.split('!')
+        return float(eval_expression(operands[1])) * float(eval_expression(operands[2]))
+    if value[:2] == '/!':
+        operands = value.split('!')
+        return float(eval_expression(operands[1])) / float(eval_expression(operands[2]))
 
-def line(k,i):
+def execute_line(i):
+    global variables
     split = i.split(' ')
+    match split[0]:
 
-    if split[0] == 'v':
-        key, value = " ".join(i.split(" ")[1:]).split('=', 1)
-        value = eval(value)
-        variables[key] = value
+        case 'v':
+            key, value = " ".join(i.split(" ")[1:]).split('=', 1)
+            value = eval_expression(value)
+            variables[key] = value
+        
+        case 'wait':
+            if split[1][0] == '$':
+                time.sleep(float(variables.get(split[1], 0)))
+            else:
+                time.sleep(float(split[1]))
 
-    if split[0] == 'wait':
-        if split[1][0] == '$':
-            time.sleep(int(variables.get(split[1])))
-        else:
-            time.sleep(int((" ".join(i.split(" ")[1:]))))
-            
-    if split[0] == 'echo':
-        if split[1][0] == '$':
-            print(variables.get(split[1]))
-        else:
-            print(" ".join(i.split(" ")[1:]))
+        case 'echo':
+            if split[1][0] == '$':
+                print(variables.get(split[1], ''))
+            else:
+                print(" ".join(i.split(" ")[1:]))
+        
+        case 'rep':
+            rep_count = int(split[1])
+            script_to_repeat = ast.literal_eval(" ".join(i.split(" ")[2:]).strip().strip(';'))
+            for _ in range(rep_count):
+                execute_script(script_to_repeat)
 
-    if split[0] == 'rep':
-        iterate = " ".join(i.split(" ")[1:])
-        iterate = " ".join(iterate.split(" ")[1:])
-        iterate.replace(';', '')
-        print(iterate)
-        print(int(split[1]))
-        for g in range(int(split[1])):
-            for j,h in enumerate(iterate):
-                line(j,h)
+        case 'if':
+            if condition(split[1]):
+                script_to_do = ast.literal_eval(" ".join(i.split(" ")[2:]).strip().strip(';'))
+                execute_script(script_to_do)
+def execute_script(script):
+    global variables
+    for line in script:
+        if line.strip():
+            execute_line(line.strip())
 
 def compile(file):
     global variables
     variables = {}
-    s = get_scr(file=file) # `s` is the script without newlines, which means its the script to compile
-    s = s.split(';')
-    s.pop(len(s)-1)
-    print(s)
-    for k,i in enumerate(s):
-        line(k,i)
-        
+    s = get_scr(file=file)  # `s` is the script without newlines, which means it's the script to compile
+    lines = s.split(';')
+    execute_script(lines)
 
-compile(r"C:\Users\spoki\OneDrive\chainlink\helloworld.cks") #temporary for easier testing
+# Example usage
+compile(r"C:\Users\spoki\OneDrive\chainlink\helloworld.cks")  # Update the path as needed
