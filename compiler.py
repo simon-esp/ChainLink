@@ -15,28 +15,33 @@ def get_scr(file):
     
 def condition(c):
     global variables
-    if c[:2] == '=!':
-        operands = c.split('!')
-        return float(eval_expression(operands[1])) == float(eval_expression(operands[2]))
+    operator = c.split(' ')[1]
+    match operator:
+        case '=':
+            operands = c.split(' ')
+            return float(eval_expression(operands[0])) == float(eval_expression(operands[2]))
 
 def eval_expression(value):
     global variables
-    if value[0] == '$':
-        return variables.get(value, 0)  # Default to 0 if the variable is not found
-    if value[0] == '"' and value[-1] == '"':
-        return value[1:-1]
-    if value[:2] == '+!':
-        operands = value.split('!')
-        return float(eval_expression(operands[1])) + float(eval_expression(operands[2]))
-    if value[:2] == '-!':
-        operands = value.split('!')
-        return float(eval_expression(operands[1])) - float(eval_expression(operands[2]))
-    if value[:2] == '*!':
-        operands = value.split('!')
-        return float(eval_expression(operands[1])) * float(eval_expression(operands[2]))
-    if value[:2] == '/!':
-        operands = value.split('!')
-        return float(eval_expression(operands[1])) / float(eval_expression(operands[2]))
+    split = value.split(' ')
+    try:
+        if split[1] == '+':
+            operands = value.split(' ')
+            return float(eval_expression(operands[0])) + float(eval_expression(operands[2]))
+        if value[:2] == '-|':
+            operands = value.split('|')
+            return float(eval_expression(operands[1])) - float(eval_expression(operands[2]))
+        if value[:2] == '*|':
+            operands = value.split('|')
+            return float(eval_expression(operands[1])) * float(eval_expression(operands[2]))
+        if value[:2] == '/|':
+            operands = value.split('|')
+            return float(eval_expression(operands[1])) / float(eval_expression(operands[2]))
+    except:
+        if value[0] == '$':
+            return variables.get(value, 0)  # Default to 0 if the variable is not found
+        if value[0] == "'" and value[-1] == "'":
+            return value[1:-1]
 
 def execute_line(i):
     global variables
@@ -62,14 +67,15 @@ def execute_line(i):
         
         case 'rep':
             rep_count = int(split[1])
-            script_to_repeat = ast.literal_eval(" ".join(i.split(" ")[2:]).strip().strip(';'))
+            script_to_repeat = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
             for _ in range(rep_count):
                 execute_script(script_to_repeat)
 
         case 'if':
-            if condition(split[1]):
-                script_to_do = ast.literal_eval(" ".join(i.split(" ")[2:]).strip().strip(';'))
+            if condition(" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[0]):
+                script_to_do = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[1]).strip('[]').split(',')) + ']')
                 execute_script(script_to_do)
+                
 def execute_script(script):
     global variables
     for line in script:
