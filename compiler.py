@@ -28,15 +28,15 @@ def eval_expression(value):
         if split[1] == '+':
             operands = value.split(' ')
             return float(eval_expression(operands[0])) + float(eval_expression(operands[2]))
-        if value[:2] == '-|':
-            operands = value.split('|')
-            return float(eval_expression(operands[1])) - float(eval_expression(operands[2]))
-        if value[:2] == '*|':
-            operands = value.split('|')
-            return float(eval_expression(operands[1])) * float(eval_expression(operands[2]))
-        if value[:2] == '/|':
-            operands = value.split('|')
-            return float(eval_expression(operands[1])) / float(eval_expression(operands[2]))
+        if value[1] == '-':
+            operands = value.split(' ')
+            return float(eval_expression(operands[0])) - float(eval_expression(operands[2]))
+        if value[1] == '*':
+            operands = value.split(' ')
+            return float(eval_expression(operands[0])) * float(eval_expression(operands[2]))
+        if value[1] == '/':
+            operands = value.split(' ')
+            return float(eval_expression(operands[0])) / float(eval_expression(operands[2]))
     except:
         if value[0] == '$':
             return variables.get(value, 0)  # Default to 0 if the variable is not found
