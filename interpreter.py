@@ -15,12 +15,26 @@ def get_scr(file):
     
 def condition(c):
     global variables
-    operator = c.split(' ')[1]
+    try:
+        r = c.split('|')[1]
+        if r == 'F':
+            r = False
+        else:
+            r == True
+    except:
+        r = True
+    s = c.split('|')[0]
+    operator = s.split(' ')[1]
     match operator:
         case '=':
-            operands = c.split(' ')
-            return float(eval_expression(operands[0])) == float(eval_expression(operands[2]))
-
+            operands = s.split(' ')
+            cond = float(eval_expression(operands[0])) == float(eval_expression(operands[2]))
+    if cond:
+        if r:return True
+        else:return False
+    else:
+        if r:return False
+        else: return True
 def eval_expression(value):
     global variables
     split = value.split(' ')
