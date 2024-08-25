@@ -113,6 +113,7 @@ def load(file):
     funcs = {}
     s = get_scr(file=file)  # `s` is the script without newlines, which means it's the script to compile
     lines = s.split(';')
+    print(lines)
     execute_script(lines)
 
 # Example usage
