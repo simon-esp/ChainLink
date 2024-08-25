@@ -69,26 +69,20 @@ def execute_line(i):
             variables[key] = value
         
         case 'wait':
-            if split[1][0] == '$':
-                time.sleep(float(variables.get(split[1], 0)))
-            else:
-                time.sleep(float(split[1]))
+            time.sleep(variables.get(split[1], '') if split[1][0] == '$' else " ".join(i.split(" ")[1:]))
 
         case 'echo':
-            if split[1][0] == '$':
-                print(variables.get(split[1], ''))
-            else:
-                print(" ".join(i.split(" ")[1:]))
-        
+            print(variables.get(split[1], '') if split[1][0] == '$' else " ".join(i.split(" ")[1:]))
+
         case 'rep':
-            rep_count = int(split[1])
+            rep_count = (variables.get(split[1], '') if split[1][0] == '$' else " ".join(i.split(" ")[1:])).split('>')[0]
             script_to_repeat = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
             for _ in range(rep_count):
                 execute_script(script_to_repeat)
 
         case 'if':
-            if condition(" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[0]):
-                script_to_do = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(":")[1]).strip('[]').split(',')) + ']')
+            if condition(" ".join(i.split(" ")[1:]).strip().strip(';').split(">")[0]):
+                script_to_do = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(">")[1]).strip('[]').split(',')) + ']')
                 execute_script(script_to_do)
         
         case 'def':
@@ -96,7 +90,8 @@ def execute_line(i):
             funcs[split[1]] = script_to_add
         
         case 'call':
-            script_to_do = funcs.get(split[1], '')
+            script_to_do = funcs.get(split[1])
+            print(funcs)
             execute_script(script_to_do)
                 
 def execute_script(script):
@@ -113,7 +108,6 @@ def load(file):
     funcs = {}
     s = get_scr(file=file)  # `s` is the script without newlines, which means it's the script to compile
     lines = s.split(';')
-    print(lines)
     execute_script(lines)
 
 # Example usage
