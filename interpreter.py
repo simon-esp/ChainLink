@@ -76,23 +76,23 @@ def execute_line(i):
 
         case 'rep':
             rep_count = (variables.get(split[1], '') if split[1][0] == '$' else " ".join(i.split(" ")[1:])).split('>')[0]
-            script_to_repeat = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
+            script = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
             for _ in range(rep_count):
-                execute_script(script_to_repeat)
+                execute_script(script)
 
         case 'if':
             if condition(" ".join(i.split(" ")[1:]).strip().strip(';').split(">")[0]):
-                script_to_do = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(">")[1]).strip('[]').split(',')) + ']')
-                execute_script(script_to_do)
+                script = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[1:]).strip().strip(';').split(">")[1]).strip('[]').split(',')) + ']')
+                execute_script(script)
         
         case 'def':
-            script_to_add = ast.literal_eval('[' + ','.join(f'"{item.strip()}"' for item in (" ".join(i.split(" ")[2:]).strip().strip(';')).strip('[]').split(',')) + ']')
-            funcs[split[1]] = script_to_add
+            name, script = " ".join(i.split(" ")[1:]).split('>')
+            funcs[name] = script.split(',')
         
         case 'call':
-            script_to_do = funcs.get(split[1])
+            script = funcs.get(split[1])
             print(funcs)
-            execute_script(script_to_do)
+            execute_script(script)
                 
 def execute_script(script):
     global variables
