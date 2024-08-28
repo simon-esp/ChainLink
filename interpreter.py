@@ -24,15 +24,33 @@ def find_functions(p):
     for i in p:
         match i.split(' ')[0]:
             case 'def':
-                p = parse(':'.join(' '.join(i.split(' ')[1:].split(':')[1:])[1:-1]))
+                keyword_gone = ' '.join(i.split(' ')[1:])
+                p = parse(':'.join(keyword_gone.split(':')[1:])[1:-1])
                 funcs[(' '.join(i.split(' ')[1:]).split(':')[0])] = p
-                print(p)
 
 def condition(cond):
     if cond == 'True':
         return True
     if cond == 'False':
         return False
+    
+def eval(e):
+    if str(e).startswith('$'):
+        return vars[e.strip('$')]
+    if str(e).isnumeric():
+        return e
+    if str(e).startswith('"') and e[-1] == '"':
+        return e[1:-1]
+    l = e.split(' ')
+    if l[1] == '+':
+        return eval(int(l[0])) + eval(int(l[2]))
+    if l[1] == '/':
+        return eval(int(l[0])) / eval(int(l[2]))
+    if l[1] == '*':
+        return eval(int(l[0])) * eval(int(l[2]))
+    if l[1] == '-':
+        return eval(int(l[0])) - eval(int(l[2]))
+            
 
 def interpret(s):
     global vars
@@ -54,12 +72,18 @@ def interpret(s):
                 vars[keyword_gone.split('=')[0]] = '='.join(keyword_gone.split('=')[1:])
             case 'var+':
                 vars[keyword_gone.split('=')[0]] = int(vars[keyword_gone.split('=')[0]])+int('='.join(keyword_gone.split('=')[1:]))
+            case 'call':
+                interpret(funcs[keyword_gone])
+            case 'input':
+                vars[keyword_gone.split(':')[0]] = input(':'.join(keyword_gone.split(':')[1:]))
 
 global vars
 vars = {}
-with open('C:\\Users\\spoki\\OneDrive\\chainlink\\test.clss', 'r') as f:
+funcs = {}
+with open('/home/simonesp/test.clss', 'r') as f:
         s = f.read()
 script = parse(s)
 find_functions(script)
 interpret(script)
-print(script)
+print(eval('10 * 10'))
+print(eval('"hello world"'))
