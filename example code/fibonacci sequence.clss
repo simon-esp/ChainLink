@@ -1,0 +1,9 @@
+input amt:"How long? ";
+var new=1;
+var old=0;
+rep $amt:{
+    var temp=$new;
+    var new=$old + $new;
+    var old=$temp;
+    echo $old;
+};
