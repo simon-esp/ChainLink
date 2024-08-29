@@ -37,27 +37,46 @@ def condition(cond):
     if l[1] == '>':
         return int(eval(l[0])) + int(eval(l[2]))
     
-def eval(c):
+def parse_eval(k):
+    quotes = False
+    array = []
+    s = ''
+    for i,k in enumerate(k):
+        if i == '"':
+            if quotes:
+                quotes = False
+            else:
+                quotes = True
+        if i == ' ' or k == len(str(i)) and not quotes:
+            array.append(s)
+            s = ''
+        else:
+            s += str(i)
+    return array
+
+
+def eval(e):
     global vars
-    if c.startswith('e'):
-        e = c[1:]
-        if str(e).startswith('$') and not ' ' in str(e):
-            return vars[e.strip('$')]
-        if str(e).isnumeric():
-            return e
-        if str(e).startswith('"') and str(e).endswith('"'):
-            return e[1:-1]
-        l = e.split(' ')
-        if l[1] == '+':
-            return int(eval(l[0])) + int(eval(l[2]))
-        if l[1] == '++':
-            return str(eval(l[0])) + str(eval(l[2]))
-        if l[1] == '/':
-            return int(eval(l[0])) / int(eval(l[2]))
-        if l[1] == '*':
-            return int(eval(l[0])) * int(eval(l[2]))
-        if l[1] == '-':
-            return int(eval(l[0])) - int(eval(l[2]))
+    if str(e).startswith('$') and not ' ' in str(e):
+        return vars[e.strip('$')]
+    if str(e).isnumeric():
+        return e
+    if str(e).startswith('"') and str(e).endswith('"'):
+            return str(e)[1:-1]
+    l = parse_eval(str(e))
+    print(l)
+    if l[1] == '+':
+        return int(eval(l[0])) + int(eval(l[2]))
+    if l[1] == '++':
+        return str(eval(l[0])) + str(eval(l[2]))
+    if l[1] == '/':
+        return int(eval(l[0])) / int(eval(l[2]))
+    if l[1] == '*':
+        return int(eval(l[0])) * int(eval(l[2]))
+    if l[1] == '**':
+        return str(eval(l[0])) * int(eval(l[2]))
+    if l[1] == '-':
+        return int(eval(l[0])) - int(eval(l[2]))
     
             
 
@@ -93,7 +112,7 @@ def interpret(s):
 global vars
 vars = {}
 funcs = {}
-with open('C:\\Users\\spoki\\OneDrive\\chainlink\\test.clss', 'r') as f:
+with open('/home/simonesp/test.clss', 'r') as f:
         s = f.read()
 script = parse(s)
 find_functions(script)
