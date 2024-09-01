@@ -6,7 +6,7 @@ from termcolor import colored, cprint
 #clear_command = input(colored('your terminals cls command: ', 'green'))
 clear_command = 'cls'
 os.system(clear_command)
-print(colored('welcome to chainline', 'green'))
+print(colored('welcome to keyring', 'green'))
 print(colored('type help for help', 'green'))
 print(colored('standard password is `123` but you can change it', 'green'))
 with open("data.txt", "r") as f:
