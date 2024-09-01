@@ -3,8 +3,7 @@ import hashlib
 from getpass import getpass
 from termcolor import colored, cprint
 
-#clear_command = input(colored('your terminals cls command: ', 'green'))
-clear_command = 'cls'
+clear_command = input(colored('your terminals cls command: ', 'green'))
 os.system(clear_command)
 print(colored('welcome to keyring', 'green'))
 print(colored('type help for help', 'green'))
