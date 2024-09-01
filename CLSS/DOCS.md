@@ -1,6 +1,6 @@
 # Documentation
 Full docs for clss
-### Variables
+## Variables
 Variables are used to store data temporarily, to understand variables you have to understand the python code behind it. The variables are stored in a dictionary, which is a python variable but also kind of limits speed. Try to only store small bits of data under 50k characters or it might get problems. The lines are split by `;`, and any spaces that comes before non-space characters on each command is removed, so indents are possible. This also allows for creative formatting, like you can have new-lines anywhere. Just make sure each command is split by a semicolon.
 #### Setting / declaring variables
 Variables are automaticly declared, so to set a variable, you use `var` as the keyword.<br> Example usage: `var test=20;`<br>
