@@ -21,7 +21,7 @@ It might not always work as it will probably be mid development<br>
 ### Steps:
 1. Download python debugger like the one microsoft has<br>
 2. Make a file called `data.txt` and put in your preffered username and host (not used really, just cosmetic for now)<br>
-3. Take to the internet and search up `sha256 hasher` and hash a preferred password, i recommend [this website](https://emn178.github.io/online-tools/sha256.html), input as utf-8 and output as hex<br>
+3. Choose a password and hash it, i recommend [this website](https://emn178.github.io/online-tools/sha256.html), input as utf-8 and output as hex<br>
 4. Put it in a file that you will call `password.txt`, make sure you are putting them inside the folder you have your python script<br>
 5. Run the python file with the debugger, doesnt matter which one you use<br>
 6. Follow the instructions, if you are unsure about anything like your clear command just google<br>
