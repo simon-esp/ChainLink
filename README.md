@@ -1,10 +1,11 @@
-# Chainline <br>
-Chainline is a python os, or right now a cml and a high level language
-<br>
-It can manouver files easily and slippery like a chain shifts with 1,000,000 bottles of chain lube on it <br>
+# Chainlink <br>
+Chainlink is supposed to be an operating system (its quite far off)<br>
+It has a custom high level language designed to interact with the keyring<br>
+(Keyring is the front gear on a mountain bike, in this context it is the terminal / shell)<br>
+Join the [discord server](https://discord.gg/KGHfK4aNPb) to get frequent updates and talk in general<br>
 ## Commandline
-Colors :O <br>
-Has a few commands that were easy to use once <br>
+It is called keyring, it was the first step i took when developing this<br>
+It has a few commands that were easy to use once <br>
 Basicly type `help` to know them <br>
 ## Programming language
 Any real operating system has its own programming language (not true)<br>
@@ -16,12 +17,12 @@ Make sure to read the [documentation](https://github.com/simon-esp/ChainLine/blo
 ## Installing<br>
 (not that you should)<br>
 Its a python file (shocking) so i recommend either running in vscode or just normal terminal<br>
-You can change the script anytime so its open-source i guess?<br>
+It might not always work as it will probably be mid development<br>
 ### Steps:
-1. Download .zip file
-2. Unzip and drag the folder where you want it
-3. Make sure the script is updated, copy the script from [main.py](https://github.com/simon-esp/ChainLine/blob/main/main.py)
-4. Go to your terminal and type `cd chainline`
-5. Run it by typing `python3 chainline.py`
+1. Download python debugger like the one microsoft has<br>
+2. Make a file called `data.txt` and put in your preffered username and host (not used really, just cosmetic for now)<br>
+3. Take to the internet and search up `sha256 hasher` and hash a preferred password<br>
+4. Put it in a file that you will call `password.txt`, make sure you are putting them inside the folder you have your python script<br>
+5. Run the python file with the debugger, doesnt matter which one you use<br>
 6. Follow the instructions, if you are unsure about anything like your clear command just google<br>
-   On windows its `cls` and on linux its `clear`
+   On windows its `cls` and on linux its `clear`<br>
