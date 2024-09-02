@@ -1,11 +1,11 @@
 var i=0;
 var amt=15;
-rep $amt:{
-    var i=$i + 1;
-    var t="*" ** $i;
-    var l=$amt - $i;
-    var l=" " ** $l;
-    var r=$l ++ $t;
-    var g=$r ++ $t;
-    echo $g;
+rep amt:{
+    var i=i + 1;
+    var t="*" ** i;
+    var l=amt - i;
+    var l=" " ** l;
+    var r=l ++ t;
+    var g=r ++ t;
+    echo g;
 };
