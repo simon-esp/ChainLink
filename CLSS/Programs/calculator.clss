@@ -3,20 +3,20 @@ while "True":{
     input op:"Operator (+,-,*,/): ";
     input left:"Left number: ";
     input right:"Right number: ";
-    if $op = "+":{
-        var weld=$left + $right;
-        echo "Answer: " ++ $weld;
+    if op = "+":{
+        var weld=left + right;
+        echo "Answer: " ++ weld;
     };
-    if $op = "-":{
-        var weld=$left - $right;
-        echo "Answer: " ++ $weld;
+    if op = "-":{
+        var weld=left - right;
+        echo "Answer: " ++ weld;
     };
-    if $op = "*":{
-        var weld=$left * $right;
-        echo "Answer: " ++ $weld;
+    if op = "*":{
+        var weld=left * right;
+        echo "Answer: " ++ weld;
     };
-    if $op = "/":{
-        var weld=$left / $right;
-        echo "Answer: " ++ $weld;
+    if op = "/":{
+        var weld=left / right;
+        echo "Answer: " ++ weld;
     };
 };
