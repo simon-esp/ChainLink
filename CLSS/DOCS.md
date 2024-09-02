@@ -37,3 +37,15 @@ Single operations is the first priority of the evaluation, the order is as follo
 `numbers`: uses isnumeric() but the - are stripped before checking<br>
 `strings`: if it is surrounded by ***double***quotes it is a string and gets returned raw<br>
 `variables and lists`: in that order, does what you expect<br>
+## Break and halt
+Breaks out of the loops
+#### Break #
+Break a specified amount of nested things, example `while "True":{while "True":{while "True":{break 2;};};};` wont break out entirely, `while "True":{while "True":{while "True":{break 2;};};};` will.
+#### Halt
+Halts the script, to be specific it breaks 9999999999999999999999999999999999999999999999999999 loops
+## Functions
+Functions are useful to reuse code
+#### def name:{script};
+Defines a script, it counts as a nested script, and it gets scanned for ***before*** running.
+#### call name;
+Calls a function, doesnt have inputs yet.
