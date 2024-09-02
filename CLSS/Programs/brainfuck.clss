@@ -13,10 +13,10 @@ var pointer=0;
 var idx=-1;
 var loop?="False";
 input code:"insert code: ";
-var codelen=$code len - 1;
-while $codelen != $idx:{
-    var idx=$idx + 1;
-    var line=$idx of $code;
+var codelen=code len - 1;
+while codelen != idx:{
+    var idx=idx + 1;
+    var line=idx of code;
     call line;
 };
 
@@ -24,49 +24,49 @@ while $codelen != $idx:{
 
 def line:{
     echo "line";
-    echo $line;
-    if $line = ">":{
-        var pointer=$pointer + 1;
+    echo line;
+    if line = ">":{
+        var pointer=pointer + 1;
     };
-    if $line = "<":{
-        var pointer=$pointer + -1;
+    if line = "<":{
+        var pointer=pointer + -1;
     };
-    if $line = "+":{
-        change mem:$pointer=$pointer in "mem" + 1;
+    if line = "+":{
+        change mem:pointer=pointer in "mem" + 1;
     };
-    if $line = "-":{
-        change mem:$pointer=$pointer in "mem" - 1;
+    if line = "-":{
+        change mem:pointer=pointer in "mem" - 1;
     };
-    if $line = "[":{
-        if $pointer in "mem" = 0:{
+    if line = "[":{
+        if pointer in "mem" = 0:{
             var brackets=1;
-            while $brackets != 0:{
-                var idx=$idx + 1;
-                if $idx 1 of $code = "[":{
-                    var brackets=$brackets + 1;
+            while inputbrackets != 0:{
+                var idx=idx + 1;
+                if idx 1 of code = "[":{
+                    var brackets=inputbrackets + 1;
                 };
-                if $idx 1 of $code ="]":{
-                    var brackets=$brackets - 1;
+                if idx 1 of code ="]":{
+                    var brackets=inputbrackets - 1;
                 };
             };
         };
-        if $pointer in "mem" != 0:{
-            append loops=$idx;
+        if pointer in "mem" != 0:{
+            append loops=idx;
         };
     };
-    if $line = "]":{
-        if $pointer in "mem" = 0:{
+    if line = "]":{
+        if pointer in "mem" = 0:{
             puncture loops:-1;
         };
-        if $pointer in "mem" != 0:{
+        if pointer in "mem" != 0:{
             var idx=-1 in "loops";
         };
     };
-    if $line = ".":{
-        echo $pointer in "mem" chr;
+    if line = ".":{
+        echo pointer in "mem" chr;
     };
-    if $line = ",":{
+    if line = ",":{
         input input:"";
-        change mem:$pointer=$input;
+        change mem:pointer=input;
     };
 };
