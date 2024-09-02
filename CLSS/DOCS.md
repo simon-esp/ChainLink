@@ -28,5 +28,12 @@ To understand operations you have to understand the code behind, it first parses
 `**` repeats the string on the left by the number on the right<br>
 `++` joins left and right strings<br>
 `# of #` is the letter of method, in python this would be `#[#]`<br>
-`# of #` is the item in list method, in python this would also be `#[#]`<br>
+`# in #` is the item in list method, in python this would also be `#[#]`<br>
+`# chr` it is the chr, if you dont know this use google<br>
+`# ord` same here<br>
 Conditions can also be assigned to variables, lists and printed<br>
+#### Single Operations
+Single operations is the first priority of the evaluation, the order is as follows<br>
+`numbers`: uses isnumeric() but the - are stripped before checking<br>
+`strings`: if it is surrounded by ***double***quotes it is a string and gets returned raw<br>
+`variables and lists`: in that order, does what you expect<br>
