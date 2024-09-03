@@ -1,0 +1,160 @@
+// not done yet
+permission "request" "file admin"
+
+def "parse(this.p)"
+    this.s = this.p.split(newline).join(" ")
+    this.nesting = 0
+    this.final = []
+    this.string = ""
+    this.indent = true
+    each this.i this.s (
+        if this.i == "{" (
+            this.nesting += 1
+        )
+        if this.i == "}" (
+            this.nesting -= 1
+        )
+        if this.i != " " (
+            this.indent = false
+        )
+        if this.i == ";" and this.nesting == 0 (
+            this.final = this.final.append(this.string)
+            this.string = ""
+            this.indent = true
+        ) else (
+            if this.indent.not (
+              this.string += this.i
+            )
+        )
+    )
+    return this.final
+endef
+
+def "find_functions" "this.p"
+  each this.i this.p (
+    switch this.i.split(" ")[1] (
+      case "def"
+        keyword_gone = i.split(" ").delete(1).join(" ")
+        this.temp = keyword_gone.split(":").delete(1).join(":")
+        funcs[i.split(" ").delete(1).join(" ").split(":")[1]] = parse(this.temp.trim(2,-2))
+        break
+    )
+  )
+endef
+
+def "condition(this.cond)"
+    if this.cond == "true" (
+        return true
+    )
+    if this.cond == "false" (
+        return false
+    )
+    this.l = this.cond.split(" ")
+    if this.l[2] == ">" (
+        return eval(this.l[1]).int + eval(this.l[3]).int
+    )
+endef
+
+def "parse_eval(this.k)"
+    this.quotes = false
+    this.array = []
+    this.s = ""
+    each this.i this.l this.k (
+        if this.l == "\"" (
+            this.quotes = this.quotes.not
+        )
+        if this.l == " " and this.quotes.not (
+            this.array = this.array.append(this.s)
+            this.s = ""
+        ) else (
+            this.s = this.s.str ++ this.l.str
+        )
+    )
+    this.array = this.array.append(this.s)
+    return this.array
+endef
+
+def "eval(this.e)"
+    if this.e.startsWith("$") and this.e.contains(" ").not (
+        return vars[this.e.trim(2,-1)]
+    )
+    if this.e.destr.istype("number") (
+        return this.e
+    )
+    
+    if this.e.startsWith("\"") and this.e.endsWith("\"") (
+        log this.e
+        return this.e
+    )
+    this.l = parse_eval(this.e.str)
+    log this.l
+    switch this.l[2] (
+      case "+"
+        return eval(this.l[1]).int + eval(this.l[3]).int
+      case "++"
+        return eval(this.l[1]).str ++ eval(this.l[3]).str
+      case "/"
+        return eval(this.l[1]).int / eval(this.l[3]).int
+      case "*"
+        return eval(this.l[1]).int * eval(this.l[3]).int
+      case "**"
+        return eval(this.l[1]).str * eval(this.l[3]).int
+      case "-"
+        return eval(this.l[1]).int - eval(this.l[3]).int
+    )
+    return 
+endef
+
+def "interpret" "this.s"
+  each this.i this.s (
+    this.keyword_gone = this.i.split(" ").delete(1).join(" ")
+    switch this.i.split(" ")[1] (
+      case "echo"
+        log eval(this.keyword_gone)
+        break
+      case "if"
+        spl = this.keyword_gone.split(":")
+        if condition(spl[1]) (
+          this.p = parse(spl.delete(1).join(":").trim(2,-2))
+          interpret this.p
+        )
+        break
+      case "rep"
+        spl = this.keyword_gone.split(":")
+        this.p = parse(spl.delete(1).join(":").trim(2,-2))
+        loop eval(spl[1]).int (
+          interpret this.p
+        )
+        break
+      case "while"
+        this.p = parse(this.keyword_gone.split(":").delete(1).join(":").trim(2,-2))
+        while condition(this.keyword_gone.split(":")[1]) (
+          interpret this.p
+        )
+        break
+      case "var"
+        spl = this.keyword_gone.split("=")
+        vars[spl[1]] = eval(spl.delete(1).join("="))
+        break
+      case "var+"
+        spl = this.keywork_gone.split("=")
+        vars[spl[1]] = eval(vars[spl[1]].int + eval(spl.delete(1).join("=")).int
+        break
+      case "call"
+        interpret funcs[this.keyword_gone]
+        break
+      case "input"
+        spl = this.keyword_gone.split(":")
+        vars[spl[1]] = eval(spl.delete(1).join(":")).ask
+        break
+      )
+    )
+endef
+
+vars = {}
+funcs = {}
+
+file "open" user_folder ++ "/desktop/tri.clss"
+script = parse(data)
+find_functions script
+interpret script
