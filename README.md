@@ -1,10 +1,10 @@
 # Chainlink <br>
 Chainlink is supposed to be an operating system (its quite far off)<br>
-It has a custom high level language designed to interact with the keyring<br>
-(Keyring is the front gear on a mountain bike, in this context it is the terminal / shell)<br>
+It has a custom high level language designed to interact with the chainring<br>
+(Chainring is the front gear on a mountain bike, in this context it is the terminal / shell)<br>
 Join the [discord server](https://discord.gg/KGHfK4aNPb) to get frequent updates and talk in general<br>
 ## Commandline
-It is called keyring, it was the first step i took when developing this<br>
+It is called chainring, it was the first step i took when developing this<br>
 It has a few commands that were easy to use once <br>
 Basicly type `help` to know them <br>
 ## Programming language
