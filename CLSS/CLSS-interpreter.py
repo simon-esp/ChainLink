@@ -60,6 +60,8 @@ def eval(e):
         return lists.get(e, None)
 
     # Parsing more complex expressions
+    if e.startswith('p"') and e.endswith('"'):
+        e = e[1:]
     l = parse_eval(e)
     f = eval(l[0])
     l.pop(0)
@@ -179,20 +181,40 @@ def interpret(s):
                 old_val[item] = new_val
                 lists[key] = old_val
 
-import time
-start_time = time.time()
-global vars
-global lists
-global brk
-vars = {}
-funcs = {}
-brk = False
-lists = {}
-with open('C:\\Users\\spoki\\OneDrive\\chainlink\\test.clss', 'r') as f:
-        s = f.read()
-script = parse(s)
-find_functions(script)
-interpret(script)
-end_time = time.time()
-elapsed_time_ms = (end_time - start_time)
-print(f"Finished in {elapsed_time_ms:.2f} seconds")
+def raw_clss(code):
+    import time
+    start_time = time.time()
+    global vars
+    global lists
+    global brk
+    vars = {}
+    funcs = {}
+    brk = False
+    lists = {}
+    script = parse(code)
+    find_functions(script)
+    interpret(script)
+    end_time = time.time()
+    elapsed_time_ms = (end_time - start_time)
+    print(f"Finished in {elapsed_time_ms:.2f} ms")
+
+def clss(dir):
+    import time
+    start_time = time.time()
+    global vars
+    global lists
+    global brk
+    vars = {}
+    funcs = {}
+    brk = False
+    lists = {}
+    with open(dir, 'r') as f:
+            s = f.read()
+    script = parse(s)
+    find_functions(script)
+    interpret(script)
+    end_time = time.time()
+    elapsed_time_ms = (end_time - start_time)
+    print(f"Finished in {elapsed_time_ms:.2f} ms")
+
+#clss('C:\\Users\\spoki\\OneDrive\\chainlink\\test.clss')
