@@ -2,10 +2,13 @@ import os
 import hashlib
 from getpass import getpass
 from termcolor import colored, cprint
+import interpreter
+import time
 
-clear_command = input(colored('your terminals cls command: ', 'green'))
+#clear_command = input(colored('your terminals cls command: ', 'green'))
+clear_command = 'cls'
 os.system(clear_command)
-print(colored('welcome to keyring', 'green'))
+print(colored('welcome to chainlink', 'green'))
 print(colored('type help for help', 'green'))
 print(colored('standard password is `123` but you can change it', 'green'))
 with open("data.txt", "r") as f:
@@ -13,7 +16,7 @@ with open("data.txt", "r") as f:
     data = data.split("|",1)
     user = data[0]
     host = data[1]
-wp = "/"
+wd = "c:\\"
 column_width = 30
 superuser = False
 
@@ -25,11 +28,13 @@ def password():
     return readpass == h.hexdigest()
 
 while True:
-    cmd_text = colored('[' + user + '§' + host + ']:' + colored(wp, attrs=['underline']) + colored('$ ', 'magenta', attrs=['bold']), 'magenta', attrs=['bold'])
+    cmd_text = colored('[' + user + '§' + host + ']:' + colored(wd, attrs=['underline']) + colored('$ ', 'magenta', attrs=['bold']), 'magenta', attrs=['bold'])
     cmd = input(cmd_text)
+    
+
     if cmd == 'ls':
         try:
-            files = os.listdir(wp)
+            files = os.listdir(wd)
             print(" ")
             for index, file in enumerate(files):
                 print(colored(f"{file:<{column_width}}", 'cyan'), end=colored(" | ", 'yellow') if (index + 1) % 3 != 0 and index + 1 != len(files) else "\n")
@@ -39,15 +44,15 @@ while True:
 
     if cmd.startswith('cd '):
         target = cmd.split(" ",1)[1]
-        wp = target
+        wd = target
 
     if cmd.startswith('cdu '):
         target = cmd.split(" ", 1)[1]
-        wp = os.path.join(wp, target)
+        wd = os.path.join(wd, target)
 
 
     if cmd == 'pwd':
-        print(wp)
+        print(wd)
 
     if cmd == 'help':
         print(' ')
@@ -124,15 +129,33 @@ while True:
 
     if cmd.startswith('cat'):
         try:
-            with open(wp + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
+            with open(wd + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
                 print (f.read())
         except Exception as e:
             print(f"Error: {e}")
+    
+    if cmd.startswith('clss'):
+        try:
+            interpreter.clss(os.path.join(wd, cmd.split(" ",1)[1]))
+        except:
+            print("something did a little oopsie")
+
+    if cmd.startswith('ev'):
+        try:
+            print(interpreter.eval(cmd.split(" ",1)[1]))
+        except:
+            print("something did a little oopsie")
+
+    if cmd.startswith('raw'):
+            try:
+                interpreter.raw_clss(cmd.split(" ",1)[1])
+            except:
+                print("something did a little oopsie")
 
     if cmd == 'cdd':
-        wp = os.path.dirname(os.path.normpath(wp))
-        if wp == '':
-            wp = '\\'
+        wd = os.path.dirname(os.path.normpath(wd))
+        if wd == '':
+            wd = '\\'
 
     if cmd == 'sl':
         print('🚂')
@@ -141,7 +164,7 @@ while True:
         split = cmd.split(" ")
         try:
             print(split)
-            full_path = os.path.join(wp, split[1])
+            full_path = os.path.join(wd, split[1])
             print(f"Trying to open file: {full_path}")  # Debugging line
             with open(full_path, 'r') as f:
                     content = f.read()
@@ -162,4 +185,4 @@ while True:
         print(" ".join(cmd.split(" ")[1:]))
 
     if cmd == 'cdtos':
-        wp = os.path.dirname(os.path.abspath(__file__))
+        wd = os.path.dirname(os.path.abspath(__file__))
