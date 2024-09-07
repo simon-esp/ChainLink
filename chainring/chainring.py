@@ -10,7 +10,7 @@ os.system(clear_command)
 print(colored('welcome to chainlink', 'green'))
 print(colored('type help for help', 'green'))
 print(colored('standard password is `123` but you can change it', 'green'))
-with open("data.txt", "r") as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt"), "r") as f:
     data = f.read()
     data = data.split("|",1)
     user = data[0]
