@@ -3,6 +3,8 @@ import hashlib
 from getpass import getpass
 from termcolor import colored, cprint
 import interpreter
+from kernel import Kernel
+kernel = Kernel()
 
 #clear_command = input(colored('your terminals cls command: ', 'green'))
 clear_command = 'cls' if os.name == 'nt' else 'clear'
@@ -15,6 +17,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt"), 
     data = data.split("|",1)
     user = data[0]
     host = data[1]
+process_count = 0
 wd = "c:\\"
 superuser = False
 
@@ -131,9 +134,19 @@ while True:
     
     elif cmd.startswith('clss'):
         try:
-            interpreter.clss(os.path.join(wd, cmd.split(" ",1)[1]))
-        except:
+            def clss(file):
+                interpreter.clss(file)  # Assuming this function exists in your interpreter module
+
+            def python(code):
+                eval(code)
+            process_count += 1
+            kernel.create_process(f'clss-{process_count}', clss, os.path.join(wd, cmd.split(" ",1)[1]))
+            kernel.run()
+            #interpreter.clss(os.path.join(wd, cmd.split(" ",1)[1]))
+        except Exception as e:
             print("something did a little oopsie")
+            print(f"Error: {e}")
+            
 
     elif cmd.startswith('ev'):
         try:
