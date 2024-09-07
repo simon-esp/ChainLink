@@ -3,10 +3,9 @@ import hashlib
 from getpass import getpass
 from termcolor import colored, cprint
 import interpreter
-import time
 
 #clear_command = input(colored('your terminals cls command: ', 'green'))
-clear_command = 'cls'
+clear_command = 'cls' if os.name == 'nt' else 'clear'
 os.system(clear_command)
 print(colored('welcome to chainlink', 'green'))
 print(colored('type help for help', 'green'))
@@ -17,7 +16,6 @@ with open("data.txt", "r") as f:
     user = data[0]
     host = data[1]
 wd = "c:\\"
-column_width = 30
 superuser = False
 
 def password():
@@ -30,11 +28,12 @@ def password():
 while True:
     cmd_text = colored('[' + user + '§' + host + ']:' + colored(wd, attrs=['underline']) + colored('$ ', 'magenta', attrs=['bold']), 'magenta', attrs=['bold'])
     cmd = input(cmd_text)
-    
 
+    history = True
     if cmd == 'ls':
         try:
             files = os.listdir(wd)
+            column_width = len(max(files, key=len)) if files else 0
             print(" ")
             for index, file in enumerate(files):
                 print(colored(f"{file:<{column_width}}", 'cyan'), end=colored(" | ", 'yellow') if (index + 1) % 3 != 0 and index + 1 != len(files) else "\n")
@@ -42,19 +41,19 @@ while True:
         except:
             print('file is not a directory, or an unexpected error occurred')
 
-    if cmd.startswith('cd '):
+    elif cmd.startswith('cd '):
         target = cmd.split(" ",1)[1]
         wd = target
 
-    if cmd.startswith('cdu '):
+    elif cmd.startswith('cdu '):
         target = cmd.split(" ", 1)[1]
         wd = os.path.join(wd, target)
 
 
-    if cmd == 'pwd':
+    elif cmd == 'pwd':
         print(wd)
 
-    if cmd == 'help':
+    elif cmd == 'help':
         print(' ')
         print(colored('Commands available:', 'cyan'))
         print(colored('ls                     | lists all files inside working directory', 'cyan'))
@@ -62,7 +61,6 @@ while True:
         print(colored('cdu {directory}        | add a path to your already existing working directory', 'cyan'))
         print(colored('cdd                    | go back 1 directory', 'cyan'))
         print(colored('pwd                    | print out current working directory', 'cyan'))
-        print(colored('dispw {column width}   | edit the column width used for various commands like `ls`', 'cyan'))
         print(colored('clr                    | clears the terminal', 'cyan'))
         print(colored('su                     | enable super user [PASSWORD PROMPT]', 'cyan'))
         print(colored('exsu                   | exit super user', 'cyan'))
@@ -77,27 +75,24 @@ while True:
         print(colored('copy {file}            | copy a file to the os folder, with a `!` in front', 'cyan'))
         print(' ')
 
-    if cmd == 'clr':
+    elif cmd == 'clr':
         os.system(clear_command)
 
-    if cmd.startswith('dispw'):
-        column_width = cmd.split(" ",1)[1]
-
-    if cmd.startswith('su'):
+    elif cmd.startswith('su'):
         if password():
             print('super user enabled')
             superuser = True
         else:
             print('incorrect password, check if its correct or if the password is incorrectly hashed')
 
-    if cmd == 'exsu':
+    elif cmd == 'exsu':
         print('super user disabled')
         superuser = False
     
-    if cmd == 'chsu':
+    elif cmd == 'chsu':
         print(superuser)
 
-    if cmd == 'pass':
+    elif cmd == 'pass':
         if superuser:
             if password():
                 new_pass = getpass('new pass: ')
@@ -111,12 +106,12 @@ while True:
         else:
             print('requires superuser')
     
-    if cmd.startswith('user '):
+    elif cmd.startswith('user '):
         user = cmd.split(" ",1)[1]
         with open("data.txt", "w") as f:  # Open file in write mode
             f.write(user + '|' + host)
 
-    if cmd.startswith('host '):
+    elif cmd.startswith('host '):
         if superuser:
             host = cmd.split(" ",1)[1]
             with open("data.txt", "w") as f:  # Open file in write mode
@@ -124,43 +119,43 @@ while True:
         else:
             print('requires superuser')
 
-    if cmd == 'bcmd':
+    elif cmd == 'bcmd':
         os.system(input('your command: '))
 
-    if cmd.startswith('cat'):
+    elif cmd.startswith('cat'):
         try:
-            with open(wd + cmd.split(" ",1)[1], 'r') as f: # The with keyword automatically closes the file when you are done
+            with open(os.path.join(wd, cmd.split(" ",1)[1]), 'r') as f: # The with keyword automatically closes the file when you are done
                 print (f.read())
         except Exception as e:
             print(f"Error: {e}")
     
-    if cmd.startswith('clss'):
+    elif cmd.startswith('clss'):
         try:
             interpreter.clss(os.path.join(wd, cmd.split(" ",1)[1]))
         except:
             print("something did a little oopsie")
 
-    if cmd.startswith('ev'):
+    elif cmd.startswith('ev'):
         try:
             print(interpreter.eval(cmd.split(" ",1)[1]))
         except:
             print("something did a little oopsie")
 
-    if cmd.startswith('raw'):
+    elif cmd.startswith('raw'):
             try:
                 interpreter.raw_clss(cmd.split(" ",1)[1])
             except:
                 print("something did a little oopsie")
 
-    if cmd == 'cdd':
+    elif cmd == 'cdd':
         wd = os.path.dirname(os.path.normpath(wd))
         if wd == '':
             wd = '\\'
 
-    if cmd == 'sl':
+    elif cmd == 'sl':
         print('🚂')
     
-    if cmd.startswith('copy '):
+    elif cmd.startswith('copy '):
         split = cmd.split(" ")
         try:
             print(split)
@@ -180,9 +175,15 @@ while True:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    if cmd.startswith('echo '):
+    elif cmd.startswith('echo '):
         # Remove 'echo ' from the beginning and print the rest of the command
         print(" ".join(cmd.split(" ")[1:]))
 
-    if cmd == 'cdtos':
+    elif cmd == 'cdtos':
         wd = os.path.dirname(os.path.abspath(__file__))
+
+    else:
+        history = False
+    if history:
+        with open('history.txt', 'a') as file:
+            file.write('\n' + cmd)
