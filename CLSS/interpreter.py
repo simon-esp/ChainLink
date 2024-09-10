@@ -1,11 +1,15 @@
+import time
+import os
+import kernel
+
 def parse(p):
-    s =  ''.join(p.splitlines())
+    s = ''.join(p.splitlines())
     nesting = 0
     final = []
     comment = False
     string = ''
     indent = True
-    for l,i in enumerate(s):
+    for l, i in enumerate(s):
         if not l == len(s) - 1:
             if i == '~':
                 comment = not comment
@@ -20,31 +24,32 @@ def parse(p):
             string = ''
             indent = True
         elif not indent and not comment and not i == '~':
-            string = string+i
-    return(final)
+            string += i
+    return final
 
 def find_functions(p):
-    global funcs
+    funcs_temp = {}
     for i in p:
-        match i.split(' ')[0]:
-            case 'def':
-                keyword_gone = ' '.join(i.split(' ')[1:])
-                p = parse(':'.join(keyword_gone.split(':')[1:])[1:-1])
-                funcs[(' '.join(i.split(' ')[1:]).split(':')[0])] = p
-    
+        if i.startswith('def '):
+            func_name = i.split(' ')[1].split(':')[0]
+            func_body = ':'.join(i.split(':')[1:])[1:-1]
+            parsed_body = parse(func_body)
+            funcs_temp[func_name] = parsed_body
+    return funcs_temp
+
 def parse_eval(k):
     quotes = False
     array = []
     s = ''
     for i in k:
         if i == '"':
-            quotes = not quotes  # Toggle quotes state
+            quotes = not quotes
         if i == ' ' and not quotes:
             array.append(s)
             s = ''
         else:
             s += i
-    if s:  # Add the last segment
+    if s:
         array.append(s)
     return array
 
@@ -58,86 +63,109 @@ def eval(e):
         return vars.get(e, None)
     elif e in lists:
         return lists.get(e, None)
+    elif e.startswith('$$'):
+        with open(str(e.strip('*$')), 'r') as file:
+            return file.readlines()
+    elif e.startswith('*$'):
+        with open(str(e.strip('*$')), 'r') as file:
+            return file.readline()
+    elif e.startswith('*'):
+        with open(str(e.strip('*')), 'r') as file:
+            return file.read()
+    elif e.startswith('#'):
+        return eval(arguments[int(e.strip('#'))])
+    elif e.startswith('%'):
+        return kernel.Memory().get(eval(str(e.strip('%'))))
+    elif e.startswith('?'):
+        f = e.strip('?')
+        module = f.split(' ')[0]
+        func_call = ' '.join(f.split(' ')[1:])
+        func_name, func_args = func_call.split(' ', 1)
+        if module in mods and func_name in mods[module]:
+            return interpret(mods[module][func_name], func_args[1:-1].split(', '))
+        else:
+            return f"Function {func_name} in module {module} not found"
+    elif e == 'file-dirname':
+        return os.path.dirname(os.path.abspath(__file__))
+    elif e == 'get-all-mem':
+        return kernel.Memory().getraw()
 
-    # Parsing more complex expressions
+    # More complex expression parsing
     if e.startswith('p"') and e.endswith('"'):
         e = e[1:]
     l = parse_eval(e)
+    if not l:
+        return None  # Avoid popping from an empty list
+
     f = eval(l[0])
     l.pop(0)
+    
     while len(l) > 0:
-        if l[0] == '+':
-            f = int(f) + int(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '-':
-            f = int(f) - int(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '*':
-            f = int(f) * int(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '/':
-            f = int(f) // int(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '++':
-            f = str(f) + str(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '**':
-            f = str(f) * int(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '=':
-            f = str(f) == str(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '>':
-            f = str(f) > str(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '<':
-            f = str(f) < str(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == '!=':
-            f = str(f) != str(eval(l[1]))
-            l.pop(0); l.pop(0)
-        elif l[0] == 'in':
-            s = lists[str(eval(l[1]))]
-            f = s[int(f)]
-            l.pop(0); l.pop(0)
-        elif l[0] == 'of':
-            s = eval(l[1])
-            print(s)
-            f = s[int(f)]
-            l.pop(0); l.pop(0)
-        elif l[0] == 'len':
-            f = len(str(f))
-            l.pop(0)
-        elif l[0] == 'chr':
-            f = chr(int(f))
-            l.pop(0)
-        elif l[0] == 'ord':
-            f = ord(str(f))
-            l.pop(0)
-        else:
-            break  # If operator not recognized, break out
+        op = l.pop(0)
+        if len(l) == 0 and op in {'len', 'chr', 'ord', 'func'}:  # Unary operations
+            if op == 'len':
+                f = len(str(f))
+            elif op == 'chr':
+                f = chr(int(f))
+            elif op == 'ord':
+                f = ord(str(f))
+            elif op == 'func':
+                f = interpret(funcs[f])
+            continue
+        
+        if len(l) == 0:
+            raise ValueError("Missing operand for operation")  # Handle missing operand
+
+        operand = eval(l.pop(0))
+        if op == '+':
+            f = int(f) + int(operand)
+        elif op == '-':
+            f = int(f) - int(operand)
+        elif op == '*':
+            f = int(f) * int(operand)
+        elif op == '/':
+            f = int(f) // int(operand)
+        elif op == '++':
+            f = str(f) + str(operand)
+        elif op == '**':
+            f = str(f) * int(operand)
+        elif op == '=':
+            f = str(f) == str(operand)
+        elif op == '!=':
+            f = str(f) != str(operand)
+        elif op == '>':
+            f = str(f) > str(operand)
+        elif op == '<':
+            f = str(f) < str(operand)
+        elif op == 'in':
+            f = lists[str(operand)][int(f)]
+        elif op == 'of':
+            f = operand[int(f)]
     return f
 
-def interpret(s):
-    global vars
-    global funcs
-    global lists
-    global brk
+def interpret(s, args=None):
+    global vars, funcs, lists, brk, mods
+    if args:
+        global arguments
+        arguments = args
+
     for i in s:
         if brk >= 1:
             brk -= 1
             break
         keyword_gone = ' '.join(i.split(' ')[1:])
-        match i.split(' ')[0]:      
+        match i.split(' ')[0]:
             case 'echo':
                 print(eval(keyword_gone))
+            case 'sleep':
+                time.sleep(int(eval(keyword_gone)))
             case 'if':
                 if eval(keyword_gone.split(':')[0]):
                     p = parse(':'.join(keyword_gone.split(':')[1:])[1:-1])
                     interpret(p)
             case 'rep':
                 p = parse(':'.join(keyword_gone.split(':')[1:])[1:-1])
-                for i in range(int(eval(keyword_gone.split(':')[0]))):
+                for _ in range(int(eval(keyword_gone.split(':')[0]))):
                     if brk >= 1:
                         brk -= 1
                         break
@@ -152,13 +180,17 @@ def interpret(s):
             case 'var':
                 vars[keyword_gone.split('=')[0]] = eval('='.join(keyword_gone.split('=')[1:]))
             case 'call':
-                interpret(funcs[keyword_gone])
+                if keyword_gone in funcs:
+                    func_name, func_args = keyword_gone.split(' ', 1)
+                    interpret(funcs[func_name], func_args[1:-1].split(', '))
+                else:
+                    print(f"Function {keyword_gone} not found")
             case 'input':
                 vars[keyword_gone.split(':')[0]] = input(eval(':'.join(keyword_gone.split(':')[1:])))
             case 'brake':
                 brk = int(eval(keyword_gone))
             case 'halt':
-                brk = 9999999999999999999999999999999999999999999999999999
+                brk = float('inf')
             case 'append':
                 new_val = eval('='.join(keyword_gone.split('=')[1:]))
                 key = keyword_gone.split('=')[0]
@@ -168,53 +200,68 @@ def interpret(s):
             case 'declare':
                 lists[keyword_gone.split('=')[0]] = []
             case 'puncture':
-                new_val = eval(':'.join(keyword_gone.split(':')[1:]))
                 key = keyword_gone.split(':')[0]
+                new_val = int(eval(':'.join(keyword_gone.split(':')[1:])))
                 old_val = lists.get(key, [])
-                old_val.pop(int(new_val))
-                lists[key] = old_val
+                if new_val < len(old_val):
+                    old_val.pop(new_val)
+                    lists[key] = old_val
             case 'change':
                 new_val = eval('='.join(keyword_gone.split('=')[1:]))
                 key = keyword_gone.split(':')[0]
                 item = int(eval(keyword_gone.split(':')[1].split('=')[0]))
                 old_val = lists.get(key, [])
-                old_val[item] = new_val
-                lists[key] = old_val
+                if item < len(old_val):
+                    old_val[item] = new_val
+                    lists[key] = old_val
+            case 'w-mem':
+                memory_instance = kernel.Memory()
+                memory_instance.write(str(eval(keyword_gone.split('=')[0])), str(eval('='.join(keyword_gone.split('=')[1:]))))
+            case 'import':
+                module_name = keyword_gone
+                with open(module_name + '.clss', 'r') as f:
+                    module_script = parse(f.read())
+                mods[module_name] = find_functions(module_script)
+            case 'mod':
+                module = keyword_gone.split(' ')[0]
+                func_call = ' '.join(keyword_gone.split(' ')[1:])
+                func_name, func_args = func_call.split(' ', 1)
+                if module in mods and func_name in mods[module]:
+                    interpret(mods[module][func_name], func_args[1:-1].split(', '))
+                else:
+                    print(f"Function {func_name} in module {module} not found")
+            case 'return':
+                return eval(keyword_gone)
 
 def raw_clss(code):
-    import time
     start_time = time.time()
-    global vars
-    global lists
-    global brk
+    global vars, lists, brk, funcs, mods
+    mods = {}
     vars = {}
-    funcs = {}
-    brk = False
+    brk = 0
     lists = {}
     script = parse(code)
-    find_functions(script)
+    funcs = find_functions(script)
     interpret(script)
     end_time = time.time()
     elapsed_time_ms = (end_time - start_time)
     print(f"Finished in {elapsed_time_ms:.2f} ms")
 
 def clss(dir):
-    import time
     start_time = time.time()
-    global vars
-    global lists
-    global brk
+    global vars, lists, brk, funcs, mods
+    mods = {}
     vars = {}
     funcs = {}
-    brk = False
+    brk = 0
     lists = {}
     with open(dir, 'r') as f:
-            s = f.read()
-    script = parse(s)
-    find_functions(script)
+        script = parse(f.read())
+    funcs = find_functions(script)
     interpret(script)
     end_time = time.time()
     elapsed_time_ms = (end_time - start_time)
     print(f"Finished in {elapsed_time_ms:.2f} ms")
 
-#clss('C:\\Users\\spoki\\OneDrive\\chainlink\\test.clss')
+if __name__ == '__main__':
+    clss('C:\\Users\\spoki\\OneDrive\\chainlink 1.0\\test.clss')
