@@ -1,7 +1,7 @@
 import kernel
-import interpreter
+import os
 
-kernel = kernel.Memory()
+kernel = kernel.clk()
 
 while True:
     cmd = input("Enter command: ")
@@ -23,6 +23,9 @@ while True:
             
     elif cmd.startswith('kernel'):
         print(kernel.getraw())
+
+    elif cmd == 'clear':
+        os.system('clear')
 
     elif cmd.startswith('clss'):
         kernel.clss_blocking(rem_cmd + '.clss')
