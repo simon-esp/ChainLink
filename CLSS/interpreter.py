@@ -1,6 +1,7 @@
 import time
 import os
 import kernel
+import keyboard
 
 def parse(p):
     s = ''.join(p.splitlines())
@@ -54,8 +55,9 @@ def parse_eval(k):
     return array
 
 def eval(e):
+    #print(e+".")
     global vars, lists
-    if e.strip('-').isnumeric():
+    if e.strip('-').strip('.').isnumeric():
         return int(e)
     elif e.startswith('"') and e.endswith('"'):
         return e[1:-1]
@@ -72,12 +74,13 @@ def eval(e):
     elif e.startswith('*'):
         with open(str(e.strip('*')), 'r') as file:
             return file.read()
-    elif e.startswith('#'):
+    elif e.startswith('#') and not " " in e:
         return eval(arguments[int(e.strip('#'))])
     elif e.startswith('%'):
-        return kernel.Memory().get(eval(str(e.strip('%'))))
+        return kernel.clk().get(eval(str(e.strip('%'))))
     elif e.startswith('?'):
         f = e.strip('?')
+
         module = f.split(' ')[0]
         func_call = ' '.join(f.split(' ')[1:])
         func_name, func_args = func_call.split(' ', 1)
@@ -88,7 +91,11 @@ def eval(e):
     elif e == 'file-dirname':
         return os.path.dirname(os.path.abspath(__file__))
     elif e == 'get-all-mem':
-        return kernel.Memory().getraw()
+        return kernel.clk().getraw()
+    elif e == 'lcp':
+        return list(kernel.clk().get('pressed_keys'))[-1]
+    elif e == 'kp':
+        return not len(list(kernel.clk().get('pressed_keys'))) <= 0
 
     # More complex expression parsing
     if e.startswith('p"') and e.endswith('"'):
@@ -96,21 +103,26 @@ def eval(e):
     l = parse_eval(e)
     if not l:
         return None  # Avoid popping from an empty list
-
     f = eval(l[0])
     l.pop(0)
     
     while len(l) > 0:
         op = l.pop(0)
-        if len(l) == 0 and op in {'len', 'chr', 'ord', 'func'}:  # Unary operations
+        if op in {'len', 'lenl', 'chr', 'ord', 'func', 'keyprs', 'rev'}:  # Unary operations
             if op == 'len':
                 f = len(str(f))
+            if op == 'lenl':
+                f = len(list(f))
             elif op == 'chr':
                 f = chr(int(f))
             elif op == 'ord':
                 f = ord(str(f))
             elif op == 'func':
                 f = interpret(funcs[f])
+            elif op == 'keyprs':
+                f = f in kernel.clk().get('pressed_keys')
+            elif op == 'rev':
+                f = not f
             continue
         
         if len(l) == 0:
@@ -121,10 +133,15 @@ def eval(e):
             f = int(f) + int(operand)
         elif op == '-':
             f = int(f) - int(operand)
+        elif op == '--':
+            f = str(f)[:len(str(f)) - int(operand)]
         elif op == '*':
             f = int(f) * int(operand)
         elif op == '/':
-            f = int(f) // int(operand)
+            f = int(f)  / int(operand)
+
+        elif op == '%':
+            f = int(f) % int(operand)
         elif op == '++':
             f = str(f) + str(operand)
         elif op == '**':
@@ -158,7 +175,7 @@ def interpret(s, args=None):
             case 'echo':
                 print(eval(keyword_gone))
             case 'sleep':
-                time.sleep(int(eval(keyword_gone)))
+                time.sleep(float(eval(keyword_gone)))
             case 'if':
                 if eval(keyword_gone.split(':')[0]):
                     p = parse(':'.join(keyword_gone.split(':')[1:])[1:-1])
@@ -180,17 +197,22 @@ def interpret(s, args=None):
             case 'var':
                 vars[keyword_gone.split('=')[0]] = eval('='.join(keyword_gone.split('=')[1:]))
             case 'call':
-                if keyword_gone in funcs:
-                    func_name, func_args = keyword_gone.split(' ', 1)
+                if keyword_gone.split(' ')[0] in funcs:
+                    func_name, func_args = keyword_gone.split(' ')
                     interpret(funcs[func_name], func_args[1:-1].split(', '))
                 else:
-                    print(f"Function {keyword_gone} not found")
+                    print(f"Function {keyword_gone.split(' ')[0]} not found")
             case 'input':
                 vars[keyword_gone.split(':')[0]] = input(eval(':'.join(keyword_gone.split(':')[1:])))
             case 'brake':
                 brk = int(eval(keyword_gone))
+            case 'passat':
+                while not eval(keyword_gone):
+                    pass
             case 'halt':
                 brk = float('inf')
+            case 'sys-cmd':
+                os.system(eval(keyword_gone))
             case 'append':
                 new_val = eval('='.join(keyword_gone.split('=')[1:]))
                 key = keyword_gone.split('=')[0]
@@ -215,11 +237,16 @@ def interpret(s, args=None):
                     old_val[item] = new_val
                     lists[key] = old_val
             case 'w-mem':
-                memory_instance = kernel.Memory()
+                memory_instance = kernel.clk()
                 memory_instance.write(str(eval(keyword_gone.split('=')[0])), str(eval('='.join(keyword_gone.split('=')[1:]))))
             case 'import':
-                module_name = keyword_gone
-                with open(module_name + '.clss', 'r') as f:
+                if '=' in keyword_gone:
+                    module_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), keyword_gone.split('=')[0])
+                    module_name = keyword_gone.split('=')[1]
+                else:
+                    module_file = keyword_gone
+                    module_name = keyword_gone
+                with open(module_file + '.clss', 'r') as f:
                     module_script = parse(f.read())
                 mods[module_name] = find_functions(module_script)
             case 'mod':
@@ -232,6 +259,18 @@ def interpret(s, args=None):
                     print(f"Function {func_name} in module {module} not found")
             case 'return':
                 return eval(keyword_gone)
+            case 'pack':
+                f = keyword_gone
+                module = f.split(' ')[0]
+                func_call = ' '.join(f.split(' ')[1:])
+                func_name, func_args = func_call.split(' ', 1)
+                if module in mods and func_name in mods[module]:
+                    interpret(mods[module][func_name], func_args[1:-1].split(', '))
+                else:
+                    print(f"Function {func_name} in module {module} not found")
+            case 'render':
+                memory_instance = kernel.clk()
+                memory_instance.graphics()
 
 def raw_clss(code):
     start_time = time.time()
@@ -264,4 +303,4 @@ def clss(dir):
     print(f"Finished in {elapsed_time_ms:.2f} ms")
 
 if __name__ == '__main__':
-    clss('C:\\Users\\spoki\\OneDrive\\chainlink 1.0\\test.clss')
+    clss('/home/simonesp/Documents/python/chainlink/test.clss')
