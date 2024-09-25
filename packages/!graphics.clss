@@ -1,0 +1,74 @@
+~standard windows size is 800x600 on linux mint at least~
+
+def line:{
+    if %"graphics" != "":{
+        var idx=1;
+        rep %"graphics" lenl:{
+            append graph=%"graphics" get idx;
+            var idx=idx + 1;
+        };
+    };
+    append graph="line";
+    append graph=#0;
+    append graph=#1;
+    append graph=#2;
+    append graph=#3;
+    w-mem "graphics"=graph;
+};
+
+def write:{
+    if %"graphics" != "":{
+        var idx=1;
+        rep %"graphics" lenl:{
+            append graph=%"graphics" get idx;
+            var idx=idx + 1;
+        };
+    };
+    append graph="txt";
+    append graph=#0;
+    append graph=#1;
+    append graph=#2;
+    w-mem "graphics"=graph;
+};
+
+def color:{
+    if %"graphics" != "":{
+        var idx=1;
+        rep %"graphics" lenl:{
+            append graph=%"graphics" get idx;
+            var idx=idx + 1;
+        };
+    };
+    append graph="color";
+    append graph=#0;
+    w-mem "graphics"=graph;
+};
+
+def size:{
+    if %"graphics" != "":{
+        var idx=1;
+        rep %"graphics" lenl:{
+            append graph=%"graphics" get idx;
+            var idx=idx + 1;
+        };
+    };
+    append graph="size";
+    append graph=#0;
+    w-mem "graphics"=graph;
+};
+
+def clr:{
+    if %"graphics" != "":{
+        var idx=1;
+        rep %"graphics" lenl:{
+            append graph=%"graphics" get idx;
+            var idx=idx + 1;
+        };
+    };
+    append graph="clr";
+    w-mem "graphics"=graph;
+};
+
+def delscr:{
+    w-mem "graphics"="[]";
+};
