@@ -21,5 +21,9 @@
 
 'clfetchlogo_l':'https://raw.githubusercontent.com/simon-esp/ChainLink/refs/heads/main/interface/clfetchlogo.txt',
 'clfetchlogo_b':1593,
-'clfetchlogo_n':'clfetchlogo.txt'
+'clfetchlogo_n':'clfetchlogo.txt',
+
+'_l':'https://raw.githubusercontent.com/simon-esp/ChainLink/refs/heads/main/interface/cml.py',
+'_b':6095,
+'_n':'cml.py'
 }
