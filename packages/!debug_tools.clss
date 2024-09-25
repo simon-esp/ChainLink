@@ -1,0 +1,8 @@
+def error:{
+    echo "error raised: " ++ #0;
+    halt;
+};
+
+def log:{
+    echo "logged: " ++ #0;
+};
