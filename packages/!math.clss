@@ -1,0 +1,24 @@
+def factorial:{
+    var n=#0;
+    var f=1;
+    rep n:{
+        var f=f * n;
+        var n=n - 1;
+    };
+    return f;
+};
+
+def gcd:{
+    var a=#0;
+    var b=#1;
+    while b != 0:{
+        var temp=b;
+        var b=a % b;
+        var a=temp;
+    };
+    return a;
+};
+
+def gr-ofst:{
+    return #0 + #1 * #2;
+};
