@@ -4,7 +4,7 @@ try:
     kernel = k.clk()
 except:
     print('kernel not installed, install with `install kernel`')
-import shutil
+import io
 
 clipboard = None
 import os
@@ -18,6 +18,65 @@ import curses
 
 # Store the working path
 wp = os.getcwd()
+
+
+def copy_to_clipboard(path):
+    """Copy file or directory to clipboard."""
+    global clipboard, clipboard_content
+    clipboard = path
+    clipboard_content = None
+
+    if os.path.isfile(path):
+        # Read file content into memory
+        with open(path, 'rb') as f:
+            clipboard_content = io.BytesIO(f.read())  # Store file content in memory
+        print(f"Copied file '{path}' to clipboard.")
+
+    elif os.path.isdir(path):
+        # Store directory contents in memory as a dictionary
+        clipboard_content = {}
+        for root, dirs, files in os.walk(path):
+            rel_dir = os.path.relpath(root, path)
+            clipboard_content[rel_dir] = {}
+            for file in files:
+                with open(os.path.join(root, file), 'rb') as f:
+                    clipboard_content[rel_dir][file] = f.read()
+        print(f"Copied directory '{path}' to clipboard.")
+        
+def paste():
+    """Paste file or directory from clipboard, even if the source is deleted."""
+    global clipboard, clipboard_content
+    print(clipboard)
+    print(clipboard_content)
+
+    if clipboard and clipboard_content is not None:
+        destination = os.path.join(wp, os.path.basename(clipboard))  # Destination in the current working directory
+
+        try:
+            if os.path.isfile(clipboard):  # If a file was copied
+                # Paste the file from in-memory content
+                with open(destination, 'wb') as f:
+                    clipboard_content.seek(0)
+                    f.write(clipboard_content.read())
+                print(f"File pasted to '{destination}'")
+
+            elif os.path.isdir(clipboard):  # If a directory was copied
+                # Recreate directory structure and paste files from memory
+                for rel_dir, files in clipboard_content.items():
+                    abs_dir = os.path.join(destination, rel_dir)
+                    os.makedirs(abs_dir, exist_ok=True)
+                    for file, content in files.items():
+                        with open(os.path.join(abs_dir, file), 'wb') as f:
+                            f.write(content)
+                print(f"Directory pasted to '{destination}'")
+            
+            clipboard = None  # Clear clipboard after paste
+            clipboard_content = None
+
+        except Exception as e:
+            print(f"An error occurred during paste: {e}")
+    else:
+        print("Clipboard is empty, copy or cut something first.")
 
 def process_monitor(screen):
     curses.curs_set(0)  # Hide cursor
@@ -222,51 +281,12 @@ while True:
     elif cmd.startswith('copy '):
         source = rem_cmd
         if os.path.exists(source):
-            clipboard = source
-            print(f"Copied '{source}' to clipboard.")
-        else:
-            print(f"File or directory '{source}' does not exist.")
-
-    # Cut command
-    elif cmd.startswith('cut '):
-        source = rem_cmd
-        if os.path.exists(source):
-            clipboard = source
-            print(f"Cut '{source}' to clipboard.")
-            remove_file(rem_cmd)
+            copy_to_clipboard(source)
         else:
             print(f"File or directory '{source}' does not exist.")
 
     elif cmd.startswith('paste'):
-        if clipboard:
-            print(f"Clipboard contains: '{clipboard}'")  # Debugging print
-            destination = os.path.join(wp, os.path.basename(clipboard))
-            print(f"Destination path: '{destination}'")  # Debugging print
-            
-            try:
-                if os.path.isfile(clipboard):
-                    shutil.copy(clipboard, destination)  # Use shutil.copy for files
-                    print(f"File pasted to '{destination}'")
-                elif os.path.isdir(clipboard):
-                    shutil.copytree(clipboard, destination)  # Use shutil.copytree for directories
-                    print(f"Directory pasted to '{destination}'")
-                
-                # If cut, remove original
-                if 'cut' in cmd:  
-                    if os.path.isfile(clipboard):
-                        os.remove(clipboard)
-                        print(f"File '{clipboard}' removed after cut-paste.")
-                    elif os.path.isdir(clipboard):
-                        shutil.rmtree(clipboard)
-                        print(f"Directory '{clipboard}' removed after cut-paste.")
-                
-                clipboard = None  # Clear clipboard after paste
-            except Exception as e:
-                print(f"An error occurred during paste: {e}")
-        else:
-            print("Clipboard is empty, copy or cut something first.")
-
-
+        paste()
 
     else:
         print(f"'{cmd}' is invalid sorry man")
