@@ -25,5 +25,9 @@
 
 '_l':'https://raw.githubusercontent.com/simon-esp/ChainLink/refs/heads/main/interface/cml.py',
 '_b':9329,
-'_n':'cml.py'
+'_n':'cml.py',
+
+'climb_l':'https://raw.githubusercontent.com/simon-esp/ChainLink/refs/heads/main/interface/climb.py',
+'climb_b':9914,
+'climb_n':'climb.py'
 }
