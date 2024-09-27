@@ -4,9 +4,10 @@ try:
     kernel = k.clk()
 except:
     print('kernel not installed, install with `install kernel`')
-import io
-
-clipboard = None
+try:
+    import climb
+except:
+    print('text editor not installed, install with `install climb`')
 import os
 import requests
 import ast
@@ -18,65 +19,6 @@ import curses
 
 # Store the working path
 wp = os.getcwd()
-
-
-def copy_to_clipboard(path):
-    """Copy file or directory to clipboard."""
-    global clipboard, clipboard_content
-    clipboard = path
-    clipboard_content = None
-
-    if os.path.isfile(path):
-        # Read file content into memory
-        with open(path, 'rb') as f:
-            clipboard_content = io.BytesIO(f.read())  # Store file content in memory
-        print(f"Copied file '{path}' to clipboard.")
-
-    elif os.path.isdir(path):
-        # Store directory contents in memory as a dictionary
-        clipboard_content = {}
-        for root, dirs, files in os.walk(path):
-            rel_dir = os.path.relpath(root, path)
-            clipboard_content[rel_dir] = {}
-            for file in files:
-                with open(os.path.join(root, file), 'rb') as f:
-                    clipboard_content[rel_dir][file] = f.read()
-        print(f"Copied directory '{path}' to clipboard.")
-        
-def paste():
-    """Paste file or directory from clipboard, even if the source is deleted."""
-    global clipboard, clipboard_content
-    print(clipboard)
-    print(clipboard_content)
-
-    if clipboard and clipboard_content is not None:
-        destination = os.path.join(wp, os.path.basename(clipboard))  # Destination in the current working directory
-
-        try:
-            if os.path.isfile(clipboard):  # If a file was copied
-                # Paste the file from in-memory content
-                with open(destination, 'wb') as f:
-                    clipboard_content.seek(0)
-                    f.write(clipboard_content.read())
-                print(f"File pasted to '{destination}'")
-
-            elif os.path.isdir(clipboard):  # If a directory was copied
-                # Recreate directory structure and paste files from memory
-                for rel_dir, files in clipboard_content.items():
-                    abs_dir = os.path.join(destination, rel_dir)
-                    os.makedirs(abs_dir, exist_ok=True)
-                    for file, content in files.items():
-                        with open(os.path.join(abs_dir, file), 'wb') as f:
-                            f.write(content)
-                print(f"Directory pasted to '{destination}'")
-            
-            clipboard = None  # Clear clipboard after paste
-            clipboard_content = None
-
-        except Exception as e:
-            print(f"An error occurred during paste: {e}")
-    else:
-        print("Clipboard is empty, copy or cut something first.")
 
 def process_monitor(screen):
     curses.curs_set(0)  # Hide cursor
@@ -277,16 +219,9 @@ while True:
 
     elif cmd.startswith('touch '):
         create_file(rem_cmd)
-    
-    elif cmd.startswith('copy '):
-        source = rem_cmd
-        if os.path.exists(source):
-            copy_to_clipboard(source)
-        else:
-            print(f"File or directory '{source}' does not exist.")
 
-    elif cmd.startswith('paste'):
-        paste()
+    elif cmd.lower() == 'climb':
+        climb.climb()
 
     else:
         print(f"'{cmd}' is invalid sorry man")
